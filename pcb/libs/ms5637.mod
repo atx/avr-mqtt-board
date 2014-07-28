@@ -1,0 +1,48 @@
+PCBNEW-LibModule-V1  Wed 18 Jun 2014 09:21:56 AM CEST
+# encoding utf-8
+Units mm
+$INDEX
+ms5637
+$EndINDEX
+$MODULE ms5637
+Po 0 0 0 15 53A1365B 00000000 ~~
+Li ms5637
+Sc 0
+AR 
+Op 0 0 0
+T0 -0.5 -3.5 1 1 0 0.15 N V 21 N "ms5637"
+T1 -0.5 2.5 1 1 0 0.15 N V 21 N "VAL**"
+DS -2 -2 1 -2 0.15 21
+DS 1 -2 1 1 0.15 21
+DS 1 1 -2 1 0.15 21
+DS -2 1 -2 -2 0.15 21
+$PAD
+Sh "1" R 1.5 1.5 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0.5 -1.5
+$EndPAD
+$PAD
+Sh "2" R 1.5 1.5 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po 0.5 0.5
+$EndPAD
+$PAD
+Sh "3" R 1.5 1.5 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -1.5 0.5
+$EndPAD
+$PAD
+Sh "4" R 1.5 1.5 0 0 0
+Dr 0 0 0
+At SMD N 00888000
+Ne 0 ""
+Po -1.5 -1.5
+$EndPAD
+$EndMODULE ms5637
+$EndLIBRARY
