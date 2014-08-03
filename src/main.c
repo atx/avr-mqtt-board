@@ -138,6 +138,25 @@ static void display_date(int m, int d)
 				bitmaps_7seg7x16[10]);
 }
 
+static void display_weather(char *str)
+{
+	const uint8_t *ptr;
+
+	if (strcmp(str, "cloudy") == 0)
+		ptr = bitmaps_cloudy;
+	else if (strcmp(str, "lightning") == 0)
+		ptr = bitmaps_lightning;
+	else if (strcmp(str, "rain") == 0)
+		ptr = bitmaps_rain;
+	else if (strcmp(str, "snow") == 0)
+		ptr = bitmaps_snow;
+	else if (strcmp(str, "clear+cloud") == 0)
+		ptr = bitmaps_suncloud;
+	else
+		ptr = bitmaps_sun;
+	oled_write_image_pgm(&oled, 58, 0, 20, 2, ptr);
+}
+
 static void display_therm(signed long i)
 {
 	i /= 1000;
@@ -159,7 +178,6 @@ static void handle_message(struct umqtt_connection __attribute__((unused))*conn,
 	unsigned int h;
 	unsigned int m;
 	unsigned int s;
-	const uint8_t *ptr;
 
 	memcpy(str, data, len);
 
@@ -173,19 +191,7 @@ static void handle_message(struct umqtt_connection __attribute__((unused))*conn,
 		sscanf(str, "%d-%d-%d", &h, &m, &s);
 		display_date(m, s);
 	} else if (strcmp(topic, MQTT_TOPIC_WEATHER) == 0) {
-		if (strcmp(str, "cloudy") == 0)
-			ptr = bitmaps_cloudy;
-		else if (strcmp(str, "lightning") == 0)
-			ptr = bitmaps_lightning;
-		else if (strcmp(str, "rain") == 0)
-			ptr = bitmaps_rain;
-		else if (strcmp(str, "snow") == 0)
-			ptr = bitmaps_snow;
-		else if (strcmp(str, "clear+cloud") == 0)
-			ptr = bitmaps_suncloud;
-		else
-			ptr = bitmaps_sun;
-		oled_write_image_pgm(&oled, 58, 0, 20, 2, ptr);
+		display_weather(str);
 	}
 }
 
