@@ -1,0 +1,6 @@
+[submodule "thirdparty/avr-uip-2"]
+	path = thirdparty/avr-uip-2
+	url = https://github.com/atalax/avr-uip-2
+[submodule "thirdparty/umqtt"]
+	path = thirdparty/umqtt
+	url = https://github.com/atalax/umqtt
