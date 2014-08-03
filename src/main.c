@@ -207,6 +207,14 @@ static struct umqtt_connection mqtt = {
 	.message_callback = handle_message,
 };
 
+static void sensors_send(char *topic, signed long val)
+{
+	char buff[20];
+	int len;
+	len = snprintf(buff, sizeof(buff), "%ld", val);
+	umqtt_publish(&mqtt, topic, (uint8_t *)buff, len);
+}
+
 int main()
 {
 	struct uip_eth_addr mac;
@@ -217,10 +225,8 @@ int main()
 	struct timer dis_sensors_timer;
 	struct timer sensors_send_timer;
 	uip_ipaddr_t ip;
-	char buff[12];
 	signed long temp;
 	int hum;
-	int len;
 
 	mac.addr[0] = ETHADDR0;
 	mac.addr[1] = ETHADDR1;
@@ -303,12 +309,8 @@ int main()
 			if (timer_expired(&sensors_send_timer)) {
 				timer_restart(&sensors_send_timer);
 
-				len = snprintf(buff, sizeof(buff), "%ld", temp);
-				umqtt_publish(&mqtt, MQTT_TOPIC_TEMP,
-						(uint8_t *)buff, len);
-				len = snprintf(buff, sizeof(buff), "%d", hum);
-				umqtt_publish(&mqtt, MQTT_TOPIC_HUMIDITY,
-						(uint8_t *)buff, len);
+				sensors_send(MQTT_TOPIC_TEMP, temp);
+				sensors_send(MQTT_TOPIC_HUMIDITY, hum);
 			}
 		}
 		/* Just assume that the 0 connection is the MQTT one */
