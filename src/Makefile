@@ -66,9 +66,6 @@ avrdude: hex
 	$(OBJCOPY) -j .text -j .data -O ihex $< $@
 
 clean:
-	$(RM) *.o *.elf *.hex
-	$(RM) $(UIP_PATH)/uip/*.o
-	$(RM) $(UIP_PATH)/drivers/enc28j60/*.o
-	$(RM) $(UMQTT_PATH)/umqtt/*.o
+	$(RM) *.hex
 
 .PHONY: $(NAME).elf
