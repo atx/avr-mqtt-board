@@ -20,6 +20,7 @@
 
 #include <stdarg.h>
 
+#include "common.h"
 #include "oled.h"
 #include "gpio.h"
 
@@ -56,7 +57,7 @@ static void oled_i2c_write_byte(struct oled *oled, uint8_t byte)
 {
 	int i;
 
-	for (i = 0; i < 8; i++) { /* From MSB to LSB */
+	times(8, i) { /* From MSB to LSB */
 		/* Set bit */
 		if ((byte << i) & 0x80)
 			oled_sda_high(oled);
@@ -114,7 +115,7 @@ void oled_fill_screen(struct oled *oled, uint8_t data)
 	oled_limit_write(oled, 0, 0, 128, 8);
 
 	oled_i2c_start_data(oled);
-	for (i = 0; i < 128 * 8; i++)
+	times(128 * 8, i)
 		oled_i2c_write_byte(oled, data);
 	oled_i2c_stop(oled);
 }
@@ -128,7 +129,7 @@ void oled_write_image(struct oled *oled,
 	oled_limit_write(oled, x, y, w, h);
 
 	oled_i2c_start_data(oled);
-	for (i = 0; i < w * h; i++)
+	times(w * h, i)
 		oled_i2c_write_byte(oled, data[i]);
 	oled_i2c_stop(oled);
 }
@@ -142,7 +143,7 @@ void oled_write_image_pgm(struct oled *oled,
 	oled_limit_write(oled, x, y, w, h);
 
 	oled_i2c_start_data(oled);
-	for (i = 0; i < w * h; i++)
+	times(w * h, i)
 		oled_i2c_write_byte(oled, pgm_read_byte(progmem + i));
 	oled_i2c_stop(oled);
 }

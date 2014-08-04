@@ -21,6 +21,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+#include "common.h"
 #include "clock-arch.h"
 #include "dht.h"
 
@@ -43,7 +44,7 @@ int dht_humidity(struct dht *d)
 	while (!gpio_value(&d->gpio));
 	while (gpio_value(&d->gpio));
 
-	for (i = 0; i < 8; i++) {
+	times(8, i) {
 		while (!gpio_value(&d->gpio))
 			_delay_us(1); /* Latch onto the data signal */
 		_delay_us(40);

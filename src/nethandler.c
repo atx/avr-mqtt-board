@@ -21,6 +21,7 @@
 #include <avr/interrupt.h>
 #include <string.h>
 
+#include "common.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "network.h"
@@ -55,7 +56,7 @@ void nethandler_periodic()
 {
 	int i;
 
-	for (i = 0; i < UIP_CONNS; i++) {
+	times(UIP_CONNS, i) {
 		uip_periodic(i);
 		if (uip_len > 0) {
 			uip_arp_out();

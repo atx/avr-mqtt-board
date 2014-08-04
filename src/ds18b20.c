@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <util/delay.h>
 
+#include "common.h"
 #include "ds18b20.h"
 
 #define ds18b20_drive(ds)	\
@@ -66,7 +67,7 @@ static uint8_t ds18b20_read_byte(struct ds18b20 *ds)
 	uint8_t ret = 0;
 	int i;
 
-	for (i = 0; i < 8; i++)
+	times(8, i)
 		ret |= ds18b20_read(ds) << i;
 
 	return ret;
@@ -76,7 +77,7 @@ static void ds18b20_write_byte(struct ds18b20 *ds, uint8_t data)
 {
 	int i;
 
-	for (i = 0; i < 8; i++) {
+	times(8, i) {
 		ds18b20_write(ds, data & _BV(i));
 		_delay_us(1);
 	}
