@@ -110,7 +110,7 @@ typedef unsigned short uip_stats_t;
  *
  *  Note: This will double the amount of RAM used by the UIP BUFFER.
  */
-#define UIP_REASSEMBLY 1
+#define UIP_REASSEMBLY 0
 
 #endif /* __UIP_CONF_H__ */
 
