@@ -68,13 +68,21 @@ static struct oled oled = {
 	.scl = GPIO(C, 5),
 };
 
+#ifdef HAS_DS
+
 static struct ds18b20 therm = {
 	.gpio = GPIO(B, 1),
 };
 
+#endif
+
+#ifdef HAS_DHT
+
 static struct dht dht = {
 	.gpio = GPIO(B, 0),
 };
+
+#endif
 
 static int pointer_x = 0;
 
@@ -157,6 +165,8 @@ static void display_weather(char *str)
 	oled_write_image_pgm(&oled, 58, 0, 20, 2, ptr);
 }
 
+#ifdef HAS_DS
+
 static void display_therm(signed long i)
 {
 	i /= 1000;
@@ -164,12 +174,18 @@ static void display_therm(signed long i)
 	oled_write_image_pgm(&oled, 16 * 6, 3, 12, 3, bitmaps_7seg15x24[i % 10]);
 }
 
+#endif
+
+#ifdef HAS_DHT
+
 static void display_humidity(int i)
 {
 	oled_write_image_pgm(&oled, 128 - 10, 0, 9, 2, bitmaps_percent9x16);
 	oled_write_image_pgm(&oled, 128 - 20, 0, 7, 2, bitmaps_7seg7x16[i % 10]);
 	oled_write_image_pgm(&oled, 128 - 31, 0, 7, 2, bitmaps_7seg7x16[i / 10]);
 }
+
+#endif
 
 static void handle_message(struct umqtt_connection __attribute__((unused))*conn,
 		char *topic, uint8_t *data, int len)
@@ -213,6 +229,8 @@ static struct umqtt_connection mqtt = {
 	.message_callback = handle_message,
 };
 
+#if defined(HAS_DHT) || defined(HAS_DS)
+
 static void sensors_send(char *topic, signed long val)
 {
 	char buff[20];
@@ -220,6 +238,8 @@ static void sensors_send(char *topic, signed long val)
 	len = snprintf(buff, sizeof(buff), "%ld", val);
 	umqtt_publish(&mqtt, topic, (uint8_t *)buff, len);
 }
+
+#endif
 
 int main()
 {
@@ -231,8 +251,12 @@ int main()
 	struct timer dis_sensors_timer;
 	struct timer sensors_send_timer;
 	uip_ipaddr_t ip;
+#ifdef HAS_DS
 	signed long temp;
+#endif
+#ifdef HAS_DHT
 	int hum;
+#endif
 
 	mac.addr[0] = ETHADDR0;
 	mac.addr[1] = ETHADDR1;
@@ -248,7 +272,9 @@ int main()
 
 	stdout = &display_stream;
 
+#ifdef HAS_DS
 	ds18b20_convert(&therm); /* Initial conversion - we won't have 85C on startup */
+#endif
 
 	network_init();
 
@@ -304,18 +330,26 @@ int main()
 		if (timer_expired(&dis_sensors_timer)) {
 			timer_restart(&dis_sensors_timer);
 
+#ifdef HAS_DS
 			temp = ds18b20_read_temp(&therm);
 			ds18b20_convert(&therm);
 			display_therm(temp);
+#endif
 
+#ifdef HAS_DHT
 			hum = dht_humidity(&dht);
 			display_humidity(hum);
+#endif
 
 			if (timer_expired(&sensors_send_timer)) {
 				timer_restart(&sensors_send_timer);
 
+#ifdef HAS_DS
 				sensors_send(MQTT_TOPIC_TEMP, temp);
+#endif
+#ifdef HAS_DHT
 				sensors_send(MQTT_TOPIC_HUMIDITY, hum);
+#endif
 			}
 		}
 		/* Just assume that the 0 connection is the MQTT one */

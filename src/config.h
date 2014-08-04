@@ -32,6 +32,9 @@
 #define ENC28J60_CONTROL_DDR	DDRB
 #define ENC28J60_CONTROL_CS		PB2
 
+#define HAS_DHT
+#define HAS_DS
+
 #define MQTT_IP0				192
 #define MQTT_IP1				168
 #define MQTT_IP2				10
