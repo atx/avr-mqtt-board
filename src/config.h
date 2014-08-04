@@ -8,6 +8,9 @@
 #define _STR(x) #x
 #define STR(x) _STR(x)
 
+#define BUTTON(bank, pin, topic) \
+	{ GPIO(bank, pin), topic, 0, false}
+
 #define F_CPU		12500000UL
 
 #define IPADDR0		192
@@ -34,6 +37,7 @@
 
 #define HAS_DHT
 #define HAS_DS
+#define HAS_BUTTONS
 
 #define MQTT_IP0				192
 #define MQTT_IP1				168
@@ -47,6 +51,10 @@
 #define MQTT_TOPIC_TEMP			"sensors/temperature/frontdoor"
 #define MQTT_TOPIC_HUMIDITY		"sensors/humidity/frontdoor"
 #define MQTT_TOPIC_WEATHER		"weather/local/general"
+
+#define BUTTONS \
+	BUTTON(C, 3, "input/button/doorbell/top"), \
+	BUTTON(C, 2, "input/button/doorbell/bottom")
 
 typedef struct nethandler_state uip_tcp_appstate_t;
 #define UIP_APPCALL nethandler_umqtt_appcall

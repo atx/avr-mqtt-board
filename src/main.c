@@ -28,6 +28,7 @@
 #include <avr/wdt.h>
 #include <util/delay.h>
 
+#include "common.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "network.h"
@@ -67,6 +68,35 @@ static struct oled oled = {
 	.sda = GPIO(C, 4),
 	.scl = GPIO(C, 5),
 };
+
+#ifdef HAS_BUTTONS
+
+struct button_data {
+	struct gpio gpio;
+	char *topic;
+	unsigned int debounce_counter;
+	bool pressed;
+};
+
+static struct button_data buttons[] = {
+	BUTTONS
+};
+
+static void buttons_init()
+{
+	unsigned int i;
+
+	iterate(buttons, i) {
+		gpio_in(&buttons[i].gpio);
+		gpio_high(&buttons[i].gpio); /* Pull up */
+	}
+
+	/* Set to f_cpu / 256 - app. 191 Hertz */
+	TCCR0B = _BV(CS02);
+	TIMSK0 = _BV(TOIE0);
+}
+
+#endif
 
 #ifdef HAS_DS
 
@@ -289,6 +319,9 @@ int main()
 	enc28j60_write(ECOCON, 2);
 
 	led_init();
+#ifdef HAS_BUTTONS
+	buttons_init();
+#endif
 	clock_init();
 	uip_init();
 	sei();
@@ -365,3 +398,28 @@ ISR(INT0_vect)
 {
 	flag_packet_rx = true;
 }
+
+#ifdef HAS_BUTTONS
+
+ISR(TIMER0_OVF_vect)
+{
+	unsigned int i;
+	iterate(buttons, i) {
+		/* Do not forget, LOW means pressed */
+		if (buttons[i].pressed == gpio_value(&buttons[i].gpio))
+			buttons[i].debounce_counter++;
+		else
+			buttons[i].debounce_counter = 0;
+
+		if (buttons[i].debounce_counter > 10) {
+			/* Accept the change*/
+			buttons[i].pressed = !buttons[i].pressed;
+			buttons[i].debounce_counter = 0;
+
+			if (buttons[i].pressed)
+				umqtt_publish(&mqtt, buttons[i].topic, (uint8_t *)"pressed", 7);
+		}
+	}
+}
+
+#endif
