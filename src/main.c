@@ -296,7 +296,6 @@ int main()
 		if (timer_expired(&kalive_timer)) {
 			timer_restart(&kalive_timer);
 			umqtt_ping(&mqtt);
-			display_therm(ds18b20_read_temp(&therm));
 		}
 		if (timer_expired(&dis_time_timer)) {
 			timer_restart(&dis_time_timer);
