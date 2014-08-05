@@ -386,8 +386,12 @@ int main()
 			}
 		}
 		/* Just assume that the 0 connection is the MQTT one */
-		if (!uip_conn_active(0) && clock_time_seconds() % 10 == 0)
+		if (!uip_conn_active(0) && clock_time_seconds() % 10 == 0) {
 			nethandler_umqtt_init(&mqtt);
+			umqtt_subscribe(&mqtt, MQTT_TOPIC_DATE);
+			umqtt_subscribe(&mqtt, MQTT_TOPIC_DATETIME);
+			umqtt_subscribe(&mqtt, MQTT_TOPIC_WEATHER);
+		}
 		if (mqtt.state != UMQTT_STATE_CONNECTED)
 			led_on();
 	}

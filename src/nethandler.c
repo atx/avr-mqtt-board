@@ -85,9 +85,6 @@ void nethandler_umqtt_init(struct umqtt_connection *conn)
 	umqtt_circ_init(&conn->rxbuff);
 
 	umqtt_connect(conn, MQTT_KEEP_ALIVE, MQTT_CLIENT_ID);
-	umqtt_subscribe(conn, MQTT_TOPIC_DATE);
-	umqtt_subscribe(conn, MQTT_TOPIC_DATETIME);
-	umqtt_subscribe(conn, MQTT_TOPIC_WEATHER);
 
 	uc->appstate.conn = conn;
 }
