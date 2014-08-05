@@ -11,6 +11,9 @@
 #define BUTTON(bank, pin, topic) \
 	{ GPIO(bank, pin), topic, 0, false}
 
+#define OUTPUT(bank, pin, topic) \
+	{ GPIO(bank, pin), topic }
+
 #define F_CPU		12500000UL
 
 #define IPADDR0		192
@@ -38,6 +41,7 @@
 #define HAS_DHT
 #define HAS_DS
 #define HAS_BUTTONS
+#define HAS_OUTPUTS
 
 #define MQTT_IP0				192
 #define MQTT_IP1				168
@@ -55,6 +59,9 @@
 #define BUTTONS \
 	BUTTON(C, 3, "input/button/doorbell/top"), \
 	BUTTON(C, 2, "input/button/doorbell/bottom")
+
+#define OUTPUTS \
+	OUTPUT(C, 0, "output/binary/bell")
 
 typedef struct nethandler_state uip_tcp_appstate_t;
 #define UIP_APPCALL nethandler_umqtt_appcall

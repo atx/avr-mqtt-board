@@ -69,6 +69,36 @@ static struct oled oled = {
 	.scl = GPIO(C, 5),
 };
 
+#ifdef HAS_OUTPUTS
+
+struct output_data {
+	struct gpio gpio;
+	char *topic;
+};
+
+/* Has to be publicly accessible so we can subscribe in nethandler.c */
+struct output_data outputs[] = {
+	OUTPUTS
+};
+
+static void outputs_init()
+{
+	unsigned int i;
+
+	iterate(outputs, i) {
+		gpio_out(&outputs[i].gpio);
+		gpio_low(&outputs[i].gpio);
+	}
+}
+
+#define outputs_high(o) \
+	gpio_high(&(o)->gpio)
+
+#define outputs_low(o) \
+	gpio_low(&(o)->gpio)
+
+#endif
+
 #ifdef HAS_BUTTONS
 
 struct button_data {
@@ -238,6 +268,17 @@ static void handle_message(struct umqtt_connection __attribute__((unused))*conn,
 		display_date(m, s);
 	} else if (strcmp(topic, MQTT_TOPIC_WEATHER) == 0) {
 		display_weather(str);
+	} else {
+#ifdef HAS_OUTPUTS
+		iterate(outputs, h) {
+			if (strcmp(topic, outputs[h].topic) == 0) {
+				if (strcmp(str, "true") == 0)
+					outputs_high(&outputs[h]);
+				else
+					outputs_low(&outputs[h]);
+			}
+		}
+#endif
 	}
 }
 
@@ -281,6 +322,9 @@ int main()
 	struct timer dis_sensors_timer;
 	struct timer sensors_send_timer;
 	uip_ipaddr_t ip;
+#ifdef HAS_OUTPUTS
+	unsigned int i;
+#endif
 #ifdef HAS_DS
 	signed long temp;
 #endif
@@ -321,6 +365,9 @@ int main()
 	led_init();
 #ifdef HAS_BUTTONS
 	buttons_init();
+#endif
+#ifdef HAS_OUTPUTS
+	outputs_init();
 #endif
 	clock_init();
 	uip_init();
@@ -391,6 +438,10 @@ int main()
 			umqtt_subscribe(&mqtt, MQTT_TOPIC_DATE);
 			umqtt_subscribe(&mqtt, MQTT_TOPIC_DATETIME);
 			umqtt_subscribe(&mqtt, MQTT_TOPIC_WEATHER);
+#ifdef HAS_OUTPUTS
+			iterate(outputs, i)
+				umqtt_subscribe(&mqtt, outputs[i].topic);
+#endif
 		}
 		if (mqtt.state != UMQTT_STATE_CONNECTED)
 			led_on();
