@@ -413,22 +413,14 @@ int main()
 			flag_packet_rx = false;
 			nethandler_rx();
 		}
-		if (timer_expired(&periodic_timer)) {
-			timer_restart(&periodic_timer);
+		if (timer_tryrestart(&periodic_timer))
 			nethandler_periodic();
-		}
-		if (timer_expired(&arp_timer)) {
-			timer_restart(&arp_timer);
+		if (timer_tryrestart(&arp_timer))
 			nethandler_periodic_arp();
-		}
-		if (timer_expired(&kalive_timer)) {
-			timer_restart(&kalive_timer);
+		if (timer_tryrestart(&kalive_timer))
 			umqtt_ping(&mqtt);
-		}
-		if (timer_expired(&dis_time_timer)) {
-			timer_restart(&dis_time_timer);
+		if (timer_tryrestart(&dis_time_timer))
 			display_time();
-		}
 #ifdef HAS_SENSORS
 		if (timer_expired(&dis_sensors_timer) ||
 				timer_expired(&sensors_send_timer)) {
@@ -439,10 +431,8 @@ int main()
 			sensors_humidity_expired();
 #endif
 		}
-		if (timer_expired(&dis_sensors_timer))
-			timer_restart(&dis_sensors_timer);
-		if (timer_expired(&sensors_send_timer))
-			timer_restart(&sensors_send_timer);
+		timer_tryrestart(&dis_sensors_timer);
+		timer_tryrestart(&sensors_send_timer);
 #endif
 		/* Just assume that the 0 connection is the MQTT one */
 		if (!uip_conn_active(0) && clock_time_seconds() % 10 == 0) {
