@@ -40,6 +40,10 @@
 #include "dht.h"
 #include "umqtt/umqtt.h"
 
+#if defined(HAS_DS) || defined(HAS_DHT)
+#define HAS_SENSORS
+#endif
+
 #define led_init()		(DDRC |= _BV(PC1))
 #define led_on()		(PORTC |= _BV(PC1))
 #define led_off()		(PORTC &= ~_BV(PC1))
@@ -225,28 +229,6 @@ static void display_weather(char *str)
 	oled_write_image_pgm(&oled, 58, 0, 20, 2, ptr);
 }
 
-#ifdef HAS_DS
-
-static void display_therm(signed long i)
-{
-	i /= 1000;
-	oled_write_image_pgm(&oled, 16 * 5, 3, 12, 3, bitmaps_7seg15x24[i / 10]);
-	oled_write_image_pgm(&oled, 16 * 6, 3, 12, 3, bitmaps_7seg15x24[i % 10]);
-}
-
-#endif
-
-#ifdef HAS_DHT
-
-static void display_humidity(int i)
-{
-	oled_write_image_pgm(&oled, 128 - 10, 0, 9, 2, bitmaps_percent9x16);
-	oled_write_image_pgm(&oled, 128 - 20, 0, 7, 2, bitmaps_7seg7x16[i % 10]);
-	oled_write_image_pgm(&oled, 128 - 31, 0, 7, 2, bitmaps_7seg7x16[i / 10]);
-}
-
-#endif
-
 static void handle_message(struct umqtt_connection __attribute__((unused))*conn,
 		char *topic, uint8_t *data, int len)
 {
@@ -300,7 +282,10 @@ static struct umqtt_connection mqtt = {
 	.message_callback = handle_message,
 };
 
-#if defined(HAS_DHT) || defined(HAS_DS)
+#ifdef HAS_SENSORS
+
+struct timer dis_sensors_timer;
+struct timer sensors_send_timer;
 
 static void sensors_send(char *topic, signed long val)
 {
@@ -312,6 +297,50 @@ static void sensors_send(char *topic, signed long val)
 
 #endif
 
+#ifdef HAS_DS
+
+static void display_therm(signed long i)
+{
+	i /= 1000;
+	oled_write_image_pgm(&oled, 16 * 5, 3, 12, 3, bitmaps_7seg15x24[i / 10]);
+	oled_write_image_pgm(&oled, 16 * 6, 3, 12, 3, bitmaps_7seg15x24[i % 10]);
+}
+
+static void sensors_therm_expired()
+{
+	signed long temp = ds18b20_read_temp(&therm);
+
+	ds18b20_convert(&therm);
+
+	if (timer_expired(&dis_sensors_timer))
+		display_therm(temp);
+	if (timer_expired(&sensors_send_timer))
+		sensors_send(MQTT_TOPIC_TEMP, temp);
+}
+
+#endif
+
+#ifdef HAS_DHT
+
+static void display_humidity(int i)
+{
+	oled_write_image_pgm(&oled, 128 - 10, 0, 9, 2, bitmaps_percent9x16);
+	oled_write_image_pgm(&oled, 128 - 20, 0, 7, 2, bitmaps_7seg7x16[i % 10]);
+	oled_write_image_pgm(&oled, 128 - 31, 0, 7, 2, bitmaps_7seg7x16[i / 10]);
+}
+
+static void sensors_humidity_expired()
+{
+	int hum = dht_humidity(&dht);
+
+	if (timer_expired(&dis_sensors_timer))
+		display_humidity(hum);
+	if (timer_expired(&sensors_send_timer))
+		sensors_send(MQTT_TOPIC_HUMIDITY, hum);
+}
+
+#endif
+
 int main()
 {
 	struct uip_eth_addr mac;
@@ -319,17 +348,9 @@ int main()
 	struct timer arp_timer;
 	struct timer kalive_timer;
 	struct timer dis_time_timer;
-	struct timer dis_sensors_timer;
-	struct timer sensors_send_timer;
 	uip_ipaddr_t ip;
 #ifdef HAS_OUTPUTS
 	unsigned int i;
-#endif
-#ifdef HAS_DS
-	signed long temp;
-#endif
-#ifdef HAS_DHT
-	int hum;
 #endif
 
 	mac.addr[0] = ETHADDR0;
@@ -376,11 +397,12 @@ int main()
 	timer_set(&periodic_timer, CLOCK_SECOND / 2);
 	timer_set(&arp_timer, CLOCK_SECOND * 10);
 	timer_set(&kalive_timer, CLOCK_SECOND * MQTT_KEEP_ALIVE);
-
 	timer_set(&dis_time_timer, CLOCK_SECOND * 1);
-	timer_set(&dis_sensors_timer, CLOCK_SECOND * 5);
 
+#ifdef HAS_SENSORS
 	timer_set(&sensors_send_timer, CLOCK_SECOND * 60);
+	timer_set(&dis_sensors_timer, CLOCK_SECOND * 5);
+#endif
 
 	uip_setethaddr(mac);
 	uip_ipaddr(ip, IPADDR0, IPADDR1, IPADDR2, IPADDR3);
@@ -407,31 +429,21 @@ int main()
 			timer_restart(&dis_time_timer);
 			display_time();
 		}
-		if (timer_expired(&dis_sensors_timer)) {
-			timer_restart(&dis_sensors_timer);
-
+#ifdef HAS_SENSORS
+		if (timer_expired(&dis_sensors_timer) ||
+				timer_expired(&sensors_send_timer)) {
 #ifdef HAS_DS
-			temp = ds18b20_read_temp(&therm);
-			ds18b20_convert(&therm);
-			display_therm(temp);
-#endif
-
-#ifdef HAS_DHT
-			hum = dht_humidity(&dht);
-			display_humidity(hum);
-#endif
-
-			if (timer_expired(&sensors_send_timer)) {
-				timer_restart(&sensors_send_timer);
-
-#ifdef HAS_DS
-				sensors_send(MQTT_TOPIC_TEMP, temp);
+			sensors_therm_expired();
 #endif
 #ifdef HAS_DHT
-				sensors_send(MQTT_TOPIC_HUMIDITY, hum);
+			sensors_humidity_expired();
 #endif
-			}
 		}
+		if (timer_expired(&dis_sensors_timer))
+			timer_restart(&dis_sensors_timer);
+		if (timer_expired(&sensors_send_timer))
+			timer_restart(&sensors_send_timer);
+#endif
 		/* Just assume that the 0 connection is the MQTT one */
 		if (!uip_conn_active(0) && clock_time_seconds() % 10 == 0) {
 			nethandler_umqtt_init(&mqtt);
