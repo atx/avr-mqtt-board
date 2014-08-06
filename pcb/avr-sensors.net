@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/atx/git/avr-mqtt-board/pcb/avr-sensors.sch)
-    (date "Mon 28 Jul 2014 10:22:01 PM CEST")
+    (date "Wed 06 Aug 2014 10:40:03 AM CEST")
     (tool "Eeschema (2014-jul-16 BZR unknown)-product"))
   (components
     (comp (ref IC2)
@@ -89,12 +89,12 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 53A017A4))
     (comp (ref R5)
-      (value "49k9 1%")
+      (value "49.9 1%")
       (libsource (lib device) (part R))
       (sheetpath (names /) (tstamps /))
       (tstamp 53A090D2))
     (comp (ref R6)
-      (value "49k9 1%")
+      (value "49.9 1%")
       (libsource (lib device) (part R))
       (sheetpath (names /) (tstamps /))
       (tstamp 53A090E1))
@@ -220,6 +220,63 @@
       (sheetpath (names /) (tstamps /))
       (tstamp 53A1EDB4)))
   (libparts
+    (libpart (lib device) (part C)
+      (description "Condensateur non polarise")
+      (footprints
+        (fp SM*)
+        (fp C?)
+        (fp C1-1))
+      (fields
+        (field (name Reference) C)
+        (field (name Value) C))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib device) (part CRYSTAL)
+      (fields
+        (field (name Reference) X)
+        (field (name Value) CRYSTAL))
+      (pins
+        (pin (num 1) (name 1) (type passive))
+        (pin (num 2) (name 2) (type passive))))
+    (libpart (lib device) (part LED)
+      (footprints
+        (fp LED-3MM)
+        (fp LED-5MM)
+        (fp LED-10MM)
+        (fp LED-0603)
+        (fp LED-0805)
+        (fp LED-1206)
+        (fp LEDV))
+      (fields
+        (field (name Reference) D)
+        (field (name Value) LED))
+      (pins
+        (pin (num 1) (name A) (type passive))
+        (pin (num 2) (name K) (type passive))))
+    (libpart (lib device) (part R)
+      (description Resistance)
+      (footprints
+        (fp R?)
+        (fp SM0603)
+        (fp SM0805)
+        (fp R?-*)
+        (fp SM1206))
+      (fields
+        (field (name Reference) R)
+        (field (name Value) R))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib conn) (part BARREL_JACK)
+      (description "DC Barrel Jack")
+      (fields
+        (field (name Reference) CON)
+        (field (name Value) BARREL_JACK))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))
+        (pin (num 3) (name ~) (type passive))))
     (libpart (lib atmel) (part ATMEGA168A-A)
       (aliases
         (alias ATMEGA48A-A)
@@ -278,63 +335,6 @@
         (pin (num 3) (name OUT) (type input))
         (pin (num 4) (name Vdd) (type input))
         (pin (num 5) (name Vdd) (type input))))
-    (libpart (lib conn) (part BARREL_JACK)
-      (description "DC Barrel Jack")
-      (fields
-        (field (name Reference) CON)
-        (field (name Value) BARREL_JACK))
-      (pins
-        (pin (num 1) (name ~) (type passive))
-        (pin (num 2) (name ~) (type passive))
-        (pin (num 3) (name ~) (type passive))))
-    (libpart (lib device) (part R)
-      (description Resistance)
-      (footprints
-        (fp R?)
-        (fp SM0603)
-        (fp SM0805)
-        (fp R?-*)
-        (fp SM1206))
-      (fields
-        (field (name Reference) R)
-        (field (name Value) R))
-      (pins
-        (pin (num 1) (name ~) (type passive))
-        (pin (num 2) (name ~) (type passive))))
-    (libpart (lib device) (part LED)
-      (footprints
-        (fp LED-3MM)
-        (fp LED-5MM)
-        (fp LED-10MM)
-        (fp LED-0603)
-        (fp LED-0805)
-        (fp LED-1206)
-        (fp LEDV))
-      (fields
-        (field (name Reference) D)
-        (field (name Value) LED))
-      (pins
-        (pin (num 1) (name A) (type passive))
-        (pin (num 2) (name K) (type passive))))
-    (libpart (lib device) (part C)
-      (description "Condensateur non polarise")
-      (footprints
-        (fp SM*)
-        (fp C?)
-        (fp C1-1))
-      (fields
-        (field (name Reference) C)
-        (field (name Value) C))
-      (pins
-        (pin (num 1) (name ~) (type passive))
-        (pin (num 2) (name ~) (type passive))))
-    (libpart (lib device) (part CRYSTAL)
-      (fields
-        (field (name Reference) X)
-        (field (name Value) CRYSTAL))
-      (pins
-        (pin (num 1) (name 1) (type passive))
-        (pin (num 2) (name 2) (type passive))))
     (libpart (lib oshec-burr-brown-3) (part REG1117)
       (fields
         (field (name Reference) IC)
@@ -453,20 +453,20 @@
         (pin (num 11) (name LED_Y_-) (type input))
         (pin (num 12) (name LED_Y_+) (type input)))))
   (libraries
+    (library (logical device)
+      (uri /usr/share/kicad/library/device.lib))
+    (library (logical conn)
+      (uri /usr/share/kicad/library/conn.lib))
     (library (logical atmel)
       (uri /usr/share/kicad/library/atmel.lib))
     (library (logical dp_devices)
       (uri libs/dp_devices.lib))
     (library (logical lmt87)
       (uri libs/lmt87.lib))
-    (library (logical conn)
-      (uri /usr/share/kicad/library/conn.lib))
     (library (logical oshec-burr-brown-3)
       (uri libs/oshec-burr-brown-3.lib))
     (library (logical J0026D21BNL)
       (uri libs/J0026D21BNL.lib))
-    (library (logical device)
-      (uri /usr/share/kicad/library/device.lib))
     (library (logical ms5637)
       (uri libs/ms5637.lib))
     (library (logical oshec-microchip-enc28j60)
