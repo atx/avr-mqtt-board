@@ -400,8 +400,8 @@ int main()
 	timer_set(&dis_time_timer, CLOCK_SECOND * 1);
 
 #ifdef HAS_SENSORS
-	timer_set(&sensors_send_timer, CLOCK_SECOND * 60);
-	timer_set(&dis_sensors_timer, CLOCK_SECOND * 5);
+	timer_set(&sensors_send_timer, CLOCK_SECOND * SENSORS_PUBLISH_RATE);
+	timer_set(&dis_sensors_timer, CLOCK_SECOND * SENSORS_DISPLAY_RATE);
 #endif
 
 	uip_setethaddr(mac);

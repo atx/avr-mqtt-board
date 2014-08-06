@@ -56,6 +56,9 @@
 #define MQTT_TOPIC_HUMIDITY		"sensors/humidity/frontdoor"
 #define MQTT_TOPIC_WEATHER		"weather/local/general"
 
+#define SENSORS_PUBLISH_RATE	60
+#define SENSORS_DISPLAY_RATE	5
+
 #define BUTTONS \
 	BUTTON(C, 3, "input/button/doorbell/top"), \
 	BUTTON(C, 2, "input/button/doorbell/bottom")
