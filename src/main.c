@@ -176,22 +176,22 @@ static void display_time()
 	s = (time_day - h * 3600 - m * 60);
 
 	if (h != time_displ.hours) {
-		oled_write_image_pgm(&oled, 16 * 0, 3, 12, 3,
-				bitmaps_7seg15x24[h / 10]);
-		oled_write_image_pgm(&oled, 16 * 1, 3, 12, 3,
-				bitmaps_7seg15x24[h % 10]);
+		oled_write_image_pgm(&oled, 18 * 0, 3, 12, 3,
+				bitmaps_7seg12x24[h / 10]);
+		oled_write_image_pgm(&oled, 18 * 1, 3, 12, 3,
+				bitmaps_7seg12x24[h % 10]);
 		time_displ.hours = h;
 	}
 	if (m != time_displ.minutes) {
-		oled_write_image_pgm(&oled, 16 * 2, 3, 12, 3,
-				bitmaps_7seg15x24[m / 10]);
-		oled_write_image_pgm(&oled, 16 * 3, 3, 12, 3,
-				bitmaps_7seg15x24[m % 10]);
+		oled_write_image_pgm(&oled, 18 * 2, 3, 12, 3,
+				bitmaps_7seg12x24[m / 10]);
+		oled_write_image_pgm(&oled, 18 * 3, 3, 12, 3,
+				bitmaps_7seg12x24[m % 10]);
 		time_displ.minutes = m;
 	}
 	/* We should get called at most once per second */
-	oled_write_image_pgm(&oled, 20 + 0, 6, 7, 2, bitmaps_7seg7x16[s / 10]);
-	oled_write_image_pgm(&oled, 20 + 12, 6, 7, 2, bitmaps_7seg7x16[s % 10]);
+	oled_write_image_pgm(&oled, 23 + 0, 6, 7, 2, bitmaps_7seg7x16[s / 10]);
+	oled_write_image_pgm(&oled, 20 + 15, 6, 7, 2, bitmaps_7seg7x16[s % 10]);
 
 	time_displ.seconds = s;
 }
@@ -201,10 +201,10 @@ static void display_date(int m, int d)
 	unsigned int i;
 	char str[6];
 
-	snprintf(str, sizeof(str), "--%d-%d", m, d);
+	snprintf(str, sizeof(str), "%02d%02d", m, d);
 
 	for (i = 0; str[i]; i++)
-		oled_write_image_pgm(&oled, i * 8, 0, 7, 2,
+		oled_write_image_pgm(&oled, i * 10, 0, 7, 2,
 				str[i] >= '0' && str[i] <= '9' ?
 				bitmaps_7seg7x16[str[i] - 0x30] :
 				bitmaps_7seg7x16[10]);
@@ -302,8 +302,8 @@ static void sensors_send(char *topic, signed long val)
 static void display_therm(signed long i)
 {
 	i /= 1000;
-	oled_write_image_pgm(&oled, 16 * 5, 3, 12, 3, bitmaps_7seg15x24[i / 10]);
-	oled_write_image_pgm(&oled, 16 * 6, 3, 12, 3, bitmaps_7seg15x24[i % 10]);
+	oled_write_image_pgm(&oled, 18 * 5, 3, 12, 3, bitmaps_7seg12x24[i / 10]);
+	oled_write_image_pgm(&oled, 18 * 6, 3, 12, 3, bitmaps_7seg12x24[i % 10]);
 }
 
 static void sensors_therm_expired()
@@ -324,9 +324,9 @@ static void sensors_therm_expired()
 
 static void display_humidity(int i)
 {
-	oled_write_image_pgm(&oled, 128 - 10, 0, 9, 2, bitmaps_percent9x16);
-	oled_write_image_pgm(&oled, 128 - 20, 0, 7, 2, bitmaps_7seg7x16[i % 10]);
-	oled_write_image_pgm(&oled, 128 - 31, 0, 7, 2, bitmaps_7seg7x16[i / 10]);
+	oled_write_image_pgm(&oled, 128 - 11, 0, 11, 2, bitmaps_percent9x16);
+	oled_write_image_pgm(&oled, 128 - 22, 0, 7, 2, bitmaps_7seg7x16[i % 10]);
+	oled_write_image_pgm(&oled, 128 - 33, 0, 7, 2, bitmaps_7seg7x16[i / 10]);
 }
 
 static void sensors_humidity_expired()
